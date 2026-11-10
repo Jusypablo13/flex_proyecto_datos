@@ -1,0 +1,7 @@
+Etiqueta,Clase,Train (N),Train (%),Val (N),Val (%)
+Ninguna Falla (Sano),0,568458,97.98%,141348,98.16%
+comp1 (Eléctrico),1,3357,0.58%,498,0.35%
+comp2 (Hidráulico),2,3849,0.66%,1080,0.75%
+comp3 (Mecánico),3,2001,0.34%,426,0.30%
+comp4 (Vibración/Rodamiento),4,2535,0.44%,648,0.45%
+TOTAL POSITIVOS (Binario: Falla en H=24h),1-4,11742,2.02%,2652,1.84%

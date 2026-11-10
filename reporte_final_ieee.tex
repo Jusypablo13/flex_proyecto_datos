@@ -1,0 +1,192 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{url}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-tabla]{babel}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Predicción de Tiempos Muertos y Clasificación Automatizada de Tickets de Mantenimiento Mediante Aprendizaje Computacional en la Industria de Manufactura de Plásticos\\
+{\footnotesize \textsuperscript{*}Proyecto de Optimización Operativa en Planta de Moldeo por Inyección (Flex Guadalajara Norte)}}
+
+\author{\IEEEauthorblockN{Equipo de Ciencia de Datos y Analítica Avanzada}
+\IEEEauthorblockA{\textit{Tecnológico de Monterrey} \\
+Guadalajara, Jalisco, México}
+}
+
+\maketitle
+
+\begin{abstract}
+En las plantas de manufactura de alta demanda, la disponibilidad y confiabilidad de la maquinaria constituyen factores determinantes para la productividad y el cumplimiento de las metas operativas. En el área de moldeo por inyección de Flex Guadalajara Norte, la gestión del mantenimiento correctivo enfrenta dos desafíos interdependientes: una elevada dispersión en la duración de los paros de máquina (\textit{downtime}) que dificulta la planeación táctica de brigadas técnicas, y una persistente falta de estandarización en el registro de fallas, donde casi un tercio del tiempo muerto carece de clasificación categórica y existen discrepancias estructurales entre fuentes de datos. Este artículo presenta las secciones fundamentales del reporte de investigación: Introducción contextualizada, Definición formal de los problemas a resolver (predicción de \textit{downtime} y alineación/mapeo de columnas entre sistemas), Descripción exhaustiva del conjunto de datos (\textit{Dataset}) y los hallazgos cuantitativos del Análisis Exploratorio de Datos (EDA). Los resultados del EDA revelan una concentración del 72\% del tiempo muerto en máquinas de moldeo por inyección (IMM) y robots, un impacto desproporcionado durante los cambios de molde (29\% de las horas totales con duración mediana de 0.66~h), y la factibilidad de unir 4,928 registros mediante identificadores comunes para implementar modelos predictivos basados en procesamiento de lenguaje natural y regresión robusta.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Downtime prediction, column mapping, exploratory data analysis, predictive maintenance, injection molding, natural language processing, IEEE style.
+\end{IEEEkeywords}
+
+\section{Introducción}
+La industria moderna de manufactura electrónica y de moldeo por inyección opera bajo estrictos esquemas de producción \textit{Just-in-Time} (JIT), donde cualquier interrupción imprevista en las líneas de producción genera pérdidas financieras considerables, retrasos en la cadena de suministro y degradación de los indicadores globales de eficiencia (\textit{Overall Equipment Effectiveness}, OEE). En este contexto, el mantenimiento industrial ha evolucionado de un paradigma netamente reactivo hacia estrategias predictivas y prescriptivas impulsadas por analítica de datos y aprendizaje automático (\textit{Machine Learning}).
+
+En la planta de Flex Guadalajara Norte, específicamente en la nave de Moldeo, opera un parque industrial diversificado compuesto por más de 90 máquinas de inyección de plástico (\textit{Injection Molding Machines}, IMM), robots cartesianos de desmoldeo, termorreguladores, secadores y sistemas periféricos auxiliares. La infraestructura de control y supervisión registra diariamente eventos de paro operativo y solicitudes de mantenimiento correctivo a través de sistemas computarizados de gestión de mantenimiento (CMMS). No obstante, la coexistencia de registros operados de manera semiautomática junto con bitácoras alimentadas manualmente por técnicos de campo introduce inconsistencias de captura, latencias de diagnóstico y asimetrías de información que limitan la capacidad de reacción de la gerencia de planta.
+
+El presente proyecto surge con el propósito de capitalizar el historial de incidentes de la planta mediante técnicas avanzadas de ciencia de datos, permitiendo transformar bitácoras no estructuradas en conocimiento accionable y modelos de inferencia en tiempo real.
+
+\subsection{Descripción de los Problemas a Resolver}
+A partir del levantamiento de requerimientos y de la auditoría preliminar de los flujos de datos operativos, se formularon formalmente dos problemas centrales a resolver:
+
+\subsubsection{Predicción y Modelado del Downtime}
+El primer desafío radica en la incapacidad operativa de estimar con precisión cuántas horas permanecerá fuera de servicio una celda de manufactura desde el instante exacto en que se dispara una alarma o se levanta un ticket de falla correctiva. En la dinámica actual, la duración de los paros exhibe una varianza extrema (desde microparos de pocos minutos hasta detenciones severas superiores a 60 horas), lo que impide a los supervisores programar eficientemente la redistribución de cargas de trabajo, calcular ventanas de entrega o asignar personal técnico especializado en función de la criticidad esperada. 
+
+El objetivo primordial consiste en formular modelos supervisados (regresión con transformaciones de escala y modelos en dos etapas) capaces de predecir la duración continua del paro ($Downtime\_h$) y, simultáneamente, clasificar de forma temprana si un incidente se convertirá en un evento crítico (severidad mayor a 2 horas). La variable dependiente objetivo presenta severo sesgo a la derecha, exigiendo funciones de pérdida robustas y la incorporación de variables predictoras heterogéneas, tales como la familia de equipo, el código de falla, el turno operativo y descriptores semánticos derivados del reporte inicial.
+
+\subsubsection{Mapeo, Alineación Estructural y Normalización de Columnas}
+El segundo desafío reside en la fragmentación e inconsistencia estructural de los datos generados entre diferentes plataformas y periodos históricos. Específicamente:
+\begin{enumerate}
+    \item \textbf{Desalineación en registros históricos:} En las bases de datos de mantenimiento (como la hoja histórica \textit{2020-2021}), se detectó un desplazamiento horizontal (\textit{column drift}) en el esquema de captura: encabezados estándar contienen datos de categorías incompatibles (por ejemplo, el campo \texttt{Location} almacena descripciones de cierre de ticket, y \texttt{EQ Type} almacena la máquina asignada). Resolver esta discordancia exige un algoritmo de mapeo y reestructuración semántica de columnas para recuperar la continuidad cronológica sin corromper la integridad relacional.
+    \item \textbf{Carencia de catálogo y clasificación de fallas:} En la base operativa actual de tickets (\textit{Data}), el 29.5\% del tiempo muerto acumulado y más del 23\% de los tickets figuran como ``Sin clasificar'' o con códigos genéricos poco informativos. Asimismo, la columna objetivo de categorización fina (\texttt{Dispositivo}) presenta 44\% de valores nulos y 557 clases altamente ruidosas.
+    \item \textbf{Discrepancia semántica entre sistemas:} El tiempo de reparación capturado manualmente por los técnicos (\texttt{Repair Time}) presenta un 23\% de valores en cero y una baja correlación ($r_s \approx 0.32$) respecto al tiempo real de paro de máquina (\texttt{Downtime}). Ello exige armonizar ambas dimensiones mediante reglas de correspondencia y validación cruzada.
+\end{enumerate}
+
+\section{Dataset}
+Para el desarrollo de la investigación se consolidó una base empírica conformada por dos fuentes primarias provistas en libros de trabajo de Microsoft Excel, las cuales abarcan registros operativos correspondientes al periodo comprendido entre enero de 2025 y agosto de 2026.
+
+\subsection{Fuentes de Datos Primarias}
+\begin{enumerate}
+    \item \textbf{Base de Tickets de Mantenimiento (\texttt{Clasificacion de Tickets 2021.xlsm}):} 
+    Contiene la totalidad de órdenes de servicio registradas por el personal de planta. Su hoja principal, denominada \texttt{Data}, documenta $11,150$ filas y 42 columnas técnicas. Destacan variables clave como identificador de ticket (\texttt{Number}, e.g., \textit{REQ-1761298}), máquina afectada (\texttt{Equipment Name}), estampas de tiempo de apertura y cierre (\texttt{Opened}, \texttt{Updated}), tiempo de mano de obra (\texttt{Repair Time}), código de falla mayor (\texttt{Major Code}), código menor (\texttt{Minor code}), y campos de texto abierto correspondientes a la solicitud (\texttt{Description}) y al cierre técnico de la orden (\texttt{Work Description (Close Details)}).
+    
+    \item \textbf{Base de Tiempo Muerto (\texttt{Resumen Downtime Current.xlsx}):}
+    Registra los eventos físicos de detención en las celdas de inyección en la hoja \texttt{2024}, totalizando $10,166$ eventos válidos y un acumulado de $10,264$ horas de paro. Contiene campos relativos a la máquina (\texttt{Equipo}), familia técnica (\texttt{Tipo\_equipo}), causa tipificada (\texttt{Clase\_falla}), motivo del evento (\texttt{Reason}), marca del fabricante (\texttt{Brand}), y duración calculada del paro (\texttt{Downtime}).
+\end{enumerate}
+
+\subsection{Estrategia de Enlace Relacional (\textit{Record Linkage})}
+Uno de los hitos metodológicos consistió en la integración de ambos repositorios a través del identificador unívoco de requerimiento (\texttt{REQ}). Del total de eventos de paro registrados con ticket, se logró un cruce determinístico exacto de $4,928$ tickets compartidos entre ambas fuentes. La Tabla~\ref{tab:dataset_summary} sintetiza los parámetros volumétricos del corpus integrado.
+
+\begin{table}[htbp]
+\caption{Resumen volumétrico y cobertura de las fuentes de datos}
+\label{tab:dataset_summary}
+\begin{center}
+\begin{tabularx}{\columnwidth}{lXr}
+\toprule
+\textbf{Parámetro / Colección} & \textbf{Descripción Técnica} & \textbf{Magnitud} \\
+\midrule
+Total tickets registrados (\texttt{Data}) & Historial de órdenes CMMS & 11,150 \\
+Tickets con narrativa de cierre & Texto libre de diagnóstico & 8,599 \\
+Tickets con categoría \texttt{Dispositivo} & Etiqueta fina de componente & 6,220 \\
+Pares supervisados completos & Texto no vacío + Dispositivo & 5,222 \\
+Eventos de Downtime (\texttt{2024}) & Paros registrados en planta & 10,166 \\
+Horas totales de paro acumuladas & Duración acumulada ($Downtime$) & 10,264~h \\
+Tickets únicos enlazados & Intersección exacta vía REQ & 4,928 \\
+Parque de maquinaria analizado & Celdas activas en monitoreo & 92 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\end{table}
+
+\subsection{Calidad de Datos y Preprocesamiento}
+La auditoría estructural evidenció anomalías sistemáticas que requirieron ingeniería de datos especializada:
+\begin{itemize}
+    \item \textit{Columnas Fantasma:} Se detectaron columnas 100\% vacías tales como \texttt{Assigned to}, \texttt{Tickets found}, \texttt{Total repair time} y \texttt{Time of response}. En tanto, la columna \texttt{time 24} contenía estados operativos y \texttt{Eq2} registraba divisas (``US Dollars'', ``Mexican Peso''), procediéndose a su remoción o corrección de tipos.
+    \item \textit{Normalización Textual y de Prefijos:} Los códigos mayores presentaban redundancias inducidas por el prefijo de nave (e.g., \texttt{B7-Injection System} vs. \texttt{Injection System}). Se estandarizaron las cadenas a representaciones canónicas. En texto libre, se implementó limpieza léxica, conversión a minúsculas, eliminación de signos ortográficos, supresión de \textit{stopwords} en español y reemplazo de patrones numéricos y claves \texttt{REQ-xxxx} mediante \textit{tokens} semánticos (\texttt{num}, \texttt{ticketref}).
+    \item \textit{Agrupación de Clases Raras:} En la variable de componente \texttt{Dispositivo}, las 519 clases brutas fueron consolidadas a 353 tras corrección de tipografía y sinónimos (e.g., \textit{door's switch}, \textit{buscan error}), y finalmente compactadas a 87 clases representativas agrupando aquellas con frecuencia menor a 10 observaciones en una clase unificada \textit{Otros} (13.5\% del volumen total).
+\end{itemize}
+
+\section{Exploratory Data Analysis (EDA)}
+El análisis exploratorio de datos aportó hallazgos determinantes sobre la dinámica operativa de la planta, orientando la arquitectura de los modelos analíticos subsecuentes.
+
+\subsection{Distribución y Asimetría del Downtime}
+El análisis estadístico sobre los 10,166 eventos de tiempo muerto reveló una distribución fuertemente asimétrica hacia la derecha, con una brecha notable entre la tendencia central y los eventos extremos:
+\begin{itemize}
+    \item Mediana operativa: $0.394$~horas (aproximadamente 24 minutos).
+    \item Media muestral: $1.010$~horas ($\sigma = 2.210$~horas).
+    \item Percentil 75 ($Q_3$): $1.052$~horas.
+    \item Percentil 95: $3.882$~horas; Máximo registrado: $67.825$~horas.
+\end{itemize}
+Esta concentración se refleja en el hecho de que el 10\% de los eventos más prolongados explica más del 50\% de la totalidad de horas de paro acumuladas en la planta. La distribución empírica confirma la pertinencia matemática de aplicar transformaciones logarítmicas $\ln(1 + Downtime)$ para estabilizar la varianza en esquemas de regresión lineal y formular modelos basados en ensambles de árboles de decisión (Gradient Boosting, Random Forest) insensibles a valores atípicos severos.
+
+\subsection{Concentración por Tipo de Equipo}
+El desglose de horas y eventos en función de la jerarquía de activos industriales demostró que el tiempo muerto no se distribuye de manera homogénea entre las tecnologías instaladas, tal como se expone en la Tabla~\ref{tab:equipos}.
+
+\begin{table}[htbp]
+\caption{Distribución del Downtime acumulado según familia de equipo}
+\label{tab:equipos}
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Familia de Equipo} & \textbf{Eventos} & \textbf{Horas (h)} & \textbf{Mediana (h)} & \textbf{\% Horas} \\
+\midrule
+IMM (Inyección) & 5,056 & 5,349.7 & 0.411 & 52.12\% \\
+Robot cartesiano & 2,050 & 2,036.4 & 0.417 & 19.84\% \\
+Termorregulador & 456 & 656.0 & 0.781 & 6.39\% \\
+Secador industrial & 458 & 553.5 & 0.338 & 5.39\% \\
+Sin clasificar & 1,116 & 551.5 & 0.198 & 5.37\% \\
+Blender / Dosificador & 345 & 274.8 & 0.420 & 2.68\% \\
+Otros periféricos & 685 & 842.1 & 0.450 & 8.21\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+Las máquinas de inyección (IMM) y los robots explican de forma combinada el 71.96\% del tiempo muerto total. Un hallazgo relevante concierne a los termorreguladores: aunque acumulan únicamente 456 incidentes, su mediana por evento ($0.781$~h) es prácticamente el doble respecto a las IMM ($0.411$~h), lo cual indica que, si bien presentan baja tasa de falla, su diagnóstico y estabilización térmica demandan ventanas de intervención significativamente más prolongadas.
+
+\subsection{Perfil de Severidad y Pareto de Máquinas}
+Al analizar las 92 máquinas monitoreadas individualmente, se comprobó que el fenómeno no responde a una ley de Pareto estricta (80/20): se requieren 55 máquinas (60\% del inventario) para totalizar el 80\% de las horas de inactividad. Sin embargo, existen celdas críticas claramente individualizadas:
+\begin{itemize}
+    \item \textbf{Las Vegas (IMM):} Representa el activo más crítico de la planta, registrando 389 fallas y 472.1~horas acumuladas (4.6\% del total global), con un tiempo medio de reparación ($MTTR$) de $1.214$~h y un tiempo medio entre fallas ($MTBF$) de apenas $35.68$~h.
+    \item \textbf{Charros, LaGloriosa y Consentida:} Acumulan cada una más de 300 horas de inactividad, ubicándose en el cuadrante de alta severidad.
+    \item \textbf{LaBarranca:} Exhibe un comportamiento disímil caracterizado por una alta recurrencia de microparos: acumuló 518 eventos pero con un promedio de sólo $0.4$~h por paro ($MTBF \approx 27$~h), derivado principalmente de inestabilidades eléctricas e interrupciones repetitivas.
+\end{itemize}
+
+\subsection{Tipología de Fallas y Oportunidad de Clasificación}
+La evaluación de las causas registradas arrojó que la categoría preponderante en tiempo acumulado es \textbf{``Sin clasificar''}, abarcando $3,385$ eventos y $3,033.4$~horas de paro (29.55\% del tiempo muerto total). Entre las categorías con causa documentada sobresalen:
+\begin{enumerate}
+    \item \textit{Electrical Failure:} 1,282 eventos, 1,305.3~h (12.72\% del total).
+    \item \textit{Servicios Varios:} 516 eventos, 631.9~h (6.16\% del total), rubro ambiguo que oculta la causa raíz real.
+    \item \textit{Calibration Parameter Modification:} 440 eventos, 438.8~h (4.28\% del total).
+    \item \textit{Barrel Heater Failure:} 320 eventos, 385.7~h (3.76\% del total, mediana elevada de 0.627~h).
+    \item \textit{Broken Component:} 273 eventos, 380.7~h (3.71\% del total, mediana de 0.668~h).
+\end{enumerate}
+Este escenario fundamenta la necesidad de entrenar un clasificador basado en procesamiento de lenguaje natural (NLP) sobre la narrativa del técnico en el cierre de ticket, permitiendo imputar y desambiguar automáticamente las causas en el tercio de incidentes huérfanos de categorización.
+
+\subsection{Impacto Operativo de los Cambios de Modelo}
+Un patrón operacional crítico descubierto durante el EDA es que el 29\% de las horas de paro registradas ocurre bajo el motivo etiquetado como \textit{``CAMBIO DE MODELO -- FALLA MANTENIMIENTO''}. La mediana de duración de estos eventos se sitúa en $0.66$~horas, prácticamente duplicando la mediana del mantenimiento correctivo estándar en producción continua ($0.34$~horas). Esto evidencia que las operaciones de ajuste de moldes, conexión de coladas calientes y calibración de parámetros representan la ventana de mayor vulnerabilidad operativa para el surgimiento de averías técnicas imprevistas.
+
+\subsection{Dinámica Temporal y Correlaciones Multivariadas}
+En la dimensión temporal, el análisis mensual reflejó una trayectoria favorable: las horas mensuales de paro descendieron gradualmente desde picos de 600--870~h/mes a inicios de 2025 hacia rangos de 300--500~h/mes hacia mediados de 2026, aun cuando el conteo de eventos se mantuvo estable. A nivel horario, la densidad de fallas se intensifica durante la tarde y noche (16:00 a 22:00 horas), coincidiendo con el segundo turno de producción.
+
+Respecto a las correlaciones lineales entre variables numéricas:
+\begin{itemize}
+    \item La correlación de Spearman entre el tiempo de reparación manual (\texttt{Repair Time}) y la duración real del paro (\texttt{Downtime}) es modesta ($r_s = 0.32$), comprobando que representan magnitudes físicas distintas (horas-hombre trabajadas vs. tiempo de máquina inhabilitada).
+    \item La longitud en caracteres de la descripción de cierre presenta una correlación positiva moderada ($r = 0.59$) con el tiempo de trabajo, lo que indica que fallas de mayor complejidad inducen narrativas técnicas más extensas.
+    \item Las variables numéricas simples presentan escasa correlación directa con la duración final, estableciendo que la capacidad explicativa del modelo de predicción de \textit{downtime} radicará primordialmente en las interacciones categóricas de equipo, tipo de componente, turno y las representaciones vectoriales del texto libre.
+\end{itemize}
+
+\section{Conclusiones Preliminares y Trabajo Futuro}
+Las fases de introducción, formulación de problemas, diagnóstico del dataset y exploración estadística confirman la viabilidad técnica y el elevado retorno operativo de implementar la arquitectura analítica propuesta. La integración relacional de los $4,928$ tickets supervisados, junto con la corrección del mapeo horizontal de columnas y la mitigación del 29.5\% de registros no clasificados, sienta las bases para las siguientes fases del reporte final:
+\begin{enumerate}
+    \item Implementación de modelos de Procesamiento de Lenguaje Natural (TF-IDF a nivel n-gramas de palabras y caracteres acoplado a modelos lineales y Naive Bayes) para la clasificación automática de fallas y componentes.
+    \item Desarrollo de modelos de regresión y ensamble (Random Forest, LightGBM/XGBoost) para la predicción probabilística de la duración del \textit{downtime} al momento del reporte.
+    \item Construcción de modelos de segmentación no supervisada (k-means y clustering jerárquico) sobre indicadores de confiabilidad ($MTBF$, $MTTR$, disponibilidad) para clasificar el parque de maquinaria en cuadrantes de riesgo preventivo.
+\end{enumerate}
+
+\bibliographystyle{IEEEtran}
+\begin{thebibliography}{00}
+\bibitem{mobley2002} R. K. Mobley, \textit{An Introduction to Predictive Maintenance}. Butterworth-Heinemann, 2002.
+\bibitem{pedregosa2011} F. Pedregosa \textit{et al.}, ``Scikit-learn: Machine Learning in Python,'' \textit{Journal of Machine Learning Research}, vol. 12, pp. 2825--2830, 2011.
+\bibitem{goodfellow2016} I. Goodfellow, Y. Bengio, and A. Courville, \textit{Deep Learning}. MIT Press, 2016.
+\bibitem{jardine2006} A. K. Jardine, D. Lin, and D. Banjevic, ``A review on machinery diagnostics and prognostics implementing condition-based maintenance,'' \textit{Mechanical Systems and Signal Processing}, vol. 20, no. 7, pp. 1483--1510, 2006.
+\end{thebibliography}
+
+\end{document}

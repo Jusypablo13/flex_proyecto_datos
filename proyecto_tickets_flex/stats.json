@@ -1,0 +1,613 @@
+{
+  "filas_totales": 11150,
+  "con_texto": 8599,
+  "con_categoria": 6220,
+  "pares": 5222,
+  "clases_raw": 519,
+  "clases_normalizadas": 353,
+  "clases_finales": 87,
+  "pct_otros": 13.462274990425124,
+  "train": 4177,
+  "test": 1045,
+  "cv_mean": 0.4959768281728355,
+  "cv_std": 0.004926682053061989,
+  "ejemplos": [
+    [
+      "se realiza limpieza de husillo con purga",
+      "screw cleaning"
+    ],
+    [
+      "se cambia termopar de nariz",
+      "nozzle thermocouple"
+    ],
+    [
+      "se reemplaza manguera de aire dañada",
+      "air hose"
+    ],
+    [
+      "se realizan pruebas funcionales y opera correctamente",
+      "vacuum valve"
+    ],
+    [
+      "se cambia resistencia de nariz",
+      "nozzle heater"
+    ],
+    [
+      "se reinicia equipo por error de comunicacion can",
+      "can communication"
+    ]
+  ],
+  "mejor": {
+    "modelo": "Regresión Logística",
+    "accuracy": 0.48229665071770333,
+    "f1_macro": 0.3860392655508387,
+    "f1_weighted": 0.47994003074371167,
+    "top3": 0.7598086124401914
+  },
+  "resultados": [
+    {
+      "modelo": "Baseline (clase mayoritaria)",
+      "accuracy": 0.17799043062200956,
+      "f1_macro": 0.003473486652287179,
+      "f1_weighted": 0.05378752249503458,
+      "top3": 0.17799043062200956
+    },
+    {
+      "modelo": "Complement Naive Bayes",
+      "accuracy": 0.49282296650717705,
+      "f1_macro": 0.31835474246602635,
+      "f1_weighted": 0.4626396796736542,
+      "top3": 0.7263157894736842
+    },
+    {
+      "modelo": "Regresión Logística",
+      "accuracy": 0.48229665071770333,
+      "f1_macro": 0.3860392655508387,
+      "f1_weighted": 0.47994003074371167,
+      "top3": 0.7598086124401914
+    },
+    {
+      "modelo": "SVM lineal (LinearSVC)",
+      "accuracy": 0.4382775119617225,
+      "f1_macro": 0.36652459475250454,
+      "f1_weighted": 0.42239696209873334,
+      "top3": 0.6478468899521531
+    }
+  ],
+  "reporte": {
+    "a axis screw": {
+      "precision": 0.36363636363636365,
+      "recall": 0.8,
+      "f1-score": 0.5,
+      "support": 5.0
+    },
+    "a axis sensor": {
+      "precision": 0.4,
+      "recall": 0.6666666666666666,
+      "f1-score": 0.5,
+      "support": 3.0
+    },
+    "a axis shock absorver": {
+      "precision": 0.3333333333333333,
+      "recall": 0.5,
+      "f1-score": 0.4,
+      "support": 2.0
+    },
+    "air hose": {
+      "precision": 0.5238095238095238,
+      "recall": 0.6470588235294118,
+      "f1-score": 0.5789473684210527,
+      "support": 17.0
+    },
+    "air in water system": {
+      "precision": 1.0,
+      "recall": 0.3333333333333333,
+      "f1-score": 0.5,
+      "support": 3.0
+    },
+    "air manifold": {
+      "precision": 0.3333333333333333,
+      "recall": 0.5,
+      "f1-score": 0.4,
+      "support": 2.0
+    },
+    "air valve": {
+      "precision": 0.5,
+      "recall": 0.8,
+      "f1-score": 0.6153846153846154,
+      "support": 5.0
+    },
+    "alignment": {
+      "precision": 0.8461538461538461,
+      "recall": 0.8461538461538461,
+      "f1-score": 0.8461538461538461,
+      "support": 13.0
+    },
+    "belt": {
+      "precision": 0.5,
+      "recall": 0.75,
+      "f1-score": 0.6,
+      "support": 4.0
+    },
+    "breaker": {
+      "precision": 0.45454545454545453,
+      "recall": 0.5555555555555556,
+      "f1-score": 0.5,
+      "support": 9.0
+    },
+    "buscan error": {
+      "precision": 0.1111111111111111,
+      "recall": 0.14285714285714285,
+      "f1-score": 0.125,
+      "support": 7.0
+    },
+    "c axis piston": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 2.0
+    },
+    "c axis screw": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 2.0
+    },
+    "c axis sensor": {
+      "precision": 0.3076923076923077,
+      "recall": 0.4,
+      "f1-score": 0.34782608695652173,
+      "support": 10.0
+    },
+    "calibration parameter": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 3.0
+    },
+    "calibration parameters": {
+      "precision": 0.42857142857142855,
+      "recall": 0.6,
+      "f1-score": 0.5,
+      "support": 10.0
+    },
+    "can communication": {
+      "precision": 0.15384615384615385,
+      "recall": 0.2222222222222222,
+      "f1-score": 0.18181818181818182,
+      "support": 9.0
+    },
+    "clamping encoder": {
+      "precision": 1.0,
+      "recall": 0.6666666666666666,
+      "f1-score": 0.8,
+      "support": 3.0
+    },
+    "contactor": {
+      "precision": 0.5,
+      "recall": 0.16666666666666666,
+      "f1-score": 0.25,
+      "support": 6.0
+    },
+    "cooling valve": {
+      "precision": 0.6363636363636364,
+      "recall": 0.7,
+      "f1-score": 0.6666666666666666,
+      "support": 10.0
+    },
+    "cpu": {
+      "precision": 0.3333333333333333,
+      "recall": 0.3333333333333333,
+      "f1-score": 0.3333333333333333,
+      "support": 3.0
+    },
+    "db25 connector": {
+      "precision": 0.5,
+      "recall": 0.25,
+      "f1-score": 0.3333333333333333,
+      "support": 4.0
+    },
+    "display": {
+      "precision": 1.0,
+      "recall": 0.3333333333333333,
+      "f1-score": 0.5,
+      "support": 3.0
+    },
+    "display wire": {
+      "precision": 0.4,
+      "recall": 0.25,
+      "f1-score": 0.3076923076923077,
+      "support": 8.0
+    },
+    "door's switch": {
+      "precision": 0.3333333333333333,
+      "recall": 0.625,
+      "f1-score": 0.43478260869565216,
+      "support": 8.0
+    },
+    "drying time": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 4.0
+    },
+    "ejector encoder": {
+      "precision": 0.5,
+      "recall": 0.6666666666666666,
+      "f1-score": 0.5714285714285714,
+      "support": 6.0
+    },
+    "ejector platen": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 3.0
+    },
+    "electrical connector": {
+      "precision": 0.1,
+      "recall": 0.16666666666666666,
+      "f1-score": 0.125,
+      "support": 6.0
+    },
+    "electrical plug": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 2.0
+    },
+    "eoat": {
+      "precision": 0.5,
+      "recall": 0.5,
+      "f1-score": 0.5,
+      "support": 2.0
+    },
+    "equipment turned off": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 3.0
+    },
+    "fuse": {
+      "precision": 0.4,
+      "recall": 0.5,
+      "f1-score": 0.4444444444444444,
+      "support": 4.0
+    },
+    "installation": {
+      "precision": 0.6764705882352942,
+      "recall": 0.696969696969697,
+      "f1-score": 0.6865671641791045,
+      "support": 99.0
+    },
+    "io board": {
+      "precision": 0.15,
+      "recall": 0.3,
+      "f1-score": 0.2,
+      "support": 10.0
+    },
+    "ipc": {
+      "precision": 0.2857142857142857,
+      "recall": 0.4,
+      "f1-score": 0.3333333333333333,
+      "support": 5.0
+    },
+    "load piston": {
+      "precision": 0.5,
+      "recall": 0.5,
+      "f1-score": 0.5,
+      "support": 4.0
+    },
+    "load sensor": {
+      "precision": 0.7142857142857143,
+      "recall": 0.8333333333333334,
+      "f1-score": 0.7692307692307693,
+      "support": 6.0
+    },
+    "loader": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 2.0
+    },
+    "loader seal": {
+      "precision": 0.5,
+      "recall": 0.3333333333333333,
+      "f1-score": 0.4,
+      "support": 3.0
+    },
+    "low oil level": {
+      "precision": 0.8571428571428571,
+      "recall": 1.0,
+      "f1-score": 0.9230769230769231,
+      "support": 6.0
+    },
+    "lubrication": {
+      "precision": 0.5833333333333334,
+      "recall": 0.5833333333333334,
+      "f1-score": 0.5833333333333334,
+      "support": 12.0
+    },
+    "manifold": {
+      "precision": 0.2,
+      "recall": 0.5,
+      "f1-score": 0.2857142857142857,
+      "support": 2.0
+    },
+    "mechanical seal": {
+      "precision": 0.7272727272727273,
+      "recall": 1.0,
+      "f1-score": 0.8421052631578947,
+      "support": 8.0
+    },
+    "mold": {
+      "precision": 0.5714285714285714,
+      "recall": 0.6153846153846154,
+      "f1-score": 0.5925925925925926,
+      "support": 13.0
+    },
+    "motherboard": {
+      "precision": 0.5,
+      "recall": 0.5,
+      "f1-score": 0.5,
+      "support": 4.0
+    },
+    "motor": {
+      "precision": 0.4444444444444444,
+      "recall": 0.5333333333333333,
+      "f1-score": 0.48484848484848486,
+      "support": 15.0
+    },
+    "nozzle": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 3.0
+    },
+    "nozzle heater": {
+      "precision": 0.44,
+      "recall": 0.6111111111111112,
+      "f1-score": 0.5116279069767442,
+      "support": 18.0
+    },
+    "nozzle thermocouple": {
+      "precision": 0.6666666666666666,
+      "recall": 0.8,
+      "f1-score": 0.7272727272727273,
+      "support": 10.0
+    },
+    "offset": {
+      "precision": 0.25,
+      "recall": 0.5,
+      "f1-score": 0.3333333333333333,
+      "support": 2.0
+    },
+    "offsets": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 3.0
+    },
+    "oil leak": {
+      "precision": 0.5,
+      "recall": 0.3333333333333333,
+      "f1-score": 0.4,
+      "support": 3.0
+    },
+    "operation": {
+      "precision": 0.5607476635514018,
+      "recall": 0.3225806451612903,
+      "f1-score": 0.40955631399317405,
+      "support": 186.0
+    },
+    "operational": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 3.0
+    },
+    "otros": {
+      "precision": 0.39361702127659576,
+      "recall": 0.2624113475177305,
+      "f1-score": 0.3148936170212766,
+      "support": 141.0
+    },
+    "overload protection": {
+      "precision": 0.3333333333333333,
+      "recall": 0.5,
+      "f1-score": 0.4,
+      "support": 2.0
+    },
+    "overtemperature": {
+      "precision": 0.5,
+      "recall": 0.5,
+      "f1-score": 0.5,
+      "support": 2.0
+    },
+    "pneumatic connector": {
+      "precision": 0.2,
+      "recall": 0.25,
+      "f1-score": 0.2222222222222222,
+      "support": 4.0
+    },
+    "pokayoke": {
+      "precision": 0.5,
+      "recall": 0.75,
+      "f1-score": 0.6,
+      "support": 4.0
+    },
+    "power supply": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 4.0
+    },
+    "power unit": {
+      "precision": 0.5,
+      "recall": 0.5,
+      "f1-score": 0.5,
+      "support": 2.0
+    },
+    "power wires": {
+      "precision": 0.6,
+      "recall": 0.6,
+      "f1-score": 0.6,
+      "support": 5.0
+    },
+    "pressure sensor": {
+      "precision": 1.0,
+      "recall": 0.5,
+      "f1-score": 0.6666666666666666,
+      "support": 2.0
+    },
+    "process parameters": {
+      "precision": 0.4090909090909091,
+      "recall": 0.8181818181818182,
+      "f1-score": 0.5454545454545454,
+      "support": 22.0
+    },
+    "pump": {
+      "precision": 0.14285714285714285,
+      "recall": 0.3333333333333333,
+      "f1-score": 0.2,
+      "support": 3.0
+    },
+    "pump amplifier": {
+      "precision": 0.5333333333333333,
+      "recall": 0.8,
+      "f1-score": 0.64,
+      "support": 10.0
+    },
+    "push button": {
+      "precision": 1.0,
+      "recall": 0.4,
+      "f1-score": 0.5714285714285714,
+      "support": 5.0
+    },
+    "relay": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 2.0
+    },
+    "reset": {
+      "precision": 0.2222222222222222,
+      "recall": 0.23529411764705882,
+      "f1-score": 0.22857142857142856,
+      "support": 17.0
+    },
+    "resine bin": {
+      "precision": 0.4,
+      "recall": 0.8,
+      "f1-score": 0.5333333333333333,
+      "support": 5.0
+    },
+    "resine leak": {
+      "precision": 0.3,
+      "recall": 0.42857142857142855,
+      "f1-score": 0.35294117647058826,
+      "support": 7.0
+    },
+    "rotary platen": {
+      "precision": 0.2,
+      "recall": 0.3333333333333333,
+      "f1-score": 0.25,
+      "support": 3.0
+    },
+    "screw cleaning": {
+      "precision": 0.9540229885057471,
+      "recall": 0.8924731182795699,
+      "f1-score": 0.9222222222222223,
+      "support": 93.0
+    },
+    "security door": {
+      "precision": 0.625,
+      "recall": 0.5555555555555556,
+      "f1-score": 0.5882352941176471,
+      "support": 9.0
+    },
+    "security guard": {
+      "precision": 0.5,
+      "recall": 0.5,
+      "f1-score": 0.5,
+      "support": 4.0
+    },
+    "signal wire": {
+      "precision": 0.15789473684210525,
+      "recall": 0.375,
+      "f1-score": 0.2222222222222222,
+      "support": 8.0
+    },
+    "software": {
+      "precision": 0.09090909090909091,
+      "recall": 0.1,
+      "f1-score": 0.09523809523809523,
+      "support": 10.0
+    },
+    "ssr": {
+      "precision": 1.0,
+      "recall": 0.75,
+      "f1-score": 0.8571428571428571,
+      "support": 4.0
+    },
+    "teach pendant": {
+      "precision": 0.2222222222222222,
+      "recall": 0.5,
+      "f1-score": 0.3076923076923077,
+      "support": 4.0
+    },
+    "vacuum generator": {
+      "precision": 0.3,
+      "recall": 0.5,
+      "f1-score": 0.375,
+      "support": 6.0
+    },
+    "vacuum valve": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 2.0
+    },
+    "validation": {
+      "precision": 0.40350877192982454,
+      "recall": 0.42592592592592593,
+      "f1-score": 0.4144144144144144,
+      "support": 54.0
+    },
+    "water hose": {
+      "precision": 0.5,
+      "recall": 0.5,
+      "f1-score": 0.5,
+      "support": 4.0
+    },
+    "water leak": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 4.0
+    },
+    "x axis servoamplifier": {
+      "precision": 0.3333333333333333,
+      "recall": 0.3333333333333333,
+      "f1-score": 0.3333333333333333,
+      "support": 3.0
+    },
+    "zone 2 pcba": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 2.0
+    },
+    "macro avg": {
+      "precision": 0.38974615077004954,
+      "recall": 0.4221644479382066,
+      "f1-score": 0.3860392655508387,
+      "support": 1045.0
+    },
+    "weighted avg": {
+      "precision": 0.5100818194353253,
+      "recall": 0.48229665071770333,
+      "f1-score": 0.47994003074371167,
+      "support": 1045.0
+    }
+  }
+}

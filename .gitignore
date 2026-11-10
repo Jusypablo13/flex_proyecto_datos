@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+.ipynb_checkpoints/
+*.pkl
+*.parquet
+# Ignorar datos procesados voluminosos y raw grandes
+mantenimiento_preventivo/data/raw/*.csv
+mantenimiento_preventivo/data/processed/*.csv
+mantenimientoPreventivo/archive/*.csv
+!mantenimiento_preventivo/data/processed/imbalance_table.csv

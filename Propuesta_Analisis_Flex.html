@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Propuesta de Análisis y Preguntas para el Socio Formador</title>
+<style>
+  @page {
+    size: letter;
+    margin: 2.5cm;
+  }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #222222;
+    margin: 0;
+    padding: 0;
+  }
+  h1 {
+    font-size: 16pt;
+    font-weight: bold;
+    color: #111111;
+    margin-top: 0;
+    margin-bottom: 8px;
+    border-bottom: 2px solid #333333;
+    padding-bottom: 6px;
+  }
+  h2 {
+    font-size: 13pt;
+    font-weight: bold;
+    color: #222222;
+    margin-top: 18px;
+    margin-bottom: 8px;
+  }
+  h3 {
+    font-size: 12pt;
+    font-weight: bold;
+    color: #333333;
+    margin-top: 12px;
+    margin-bottom: 4px;
+  }
+  p {
+    margin-top: 0;
+    margin-bottom: 8px;
+    text-align: justify;
+  }
+  ul {
+    margin-top: 4px;
+    margin-bottom: 10px;
+    padding-left: 22px;
+  }
+  li {
+    margin-bottom: 4px;
+  }
+  .header-meta {
+    font-size: 10pt;
+    color: #555555;
+    margin-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Propuesta de Análisis de Datos y Plan de Trabajo</h1>
+<div class="header-meta">
+  <strong>Proyecto:</strong> Optimización de Mantenimiento y Reducción de Tiempos Muertos &nbsp;|&nbsp; <strong>Fuente:</strong> Análisis Exploratorio de Datos (EDA)
+</div>
+
+<h2>1. Resumen y Contexto del Análisis</h2>
+<p>
+Con base en el análisis exploratorio realizado sobre los registros de paros de equipo y tickets de mantenimiento, se observó que el 52% del tiempo muerto se concentra en máquinas de inyección (IMM) y 20% en robots. Además, el 29% del tiempo de paro se relaciona con fallas durante cambios de modelo, y casi un tercio del tiempo muerto carece de una clasificación de causa registrada ("Sin clasificar"). El objetivo analítico propuesto es anticipar eventos severos, clasificar causas no identificadas y perfilar equipos críticos para guiar la toma de decisiones del equipo de mantenimiento.
+</p>
+
+<h2>2. Estrategia Analítica y Modelos Sugeridos</h2>
+
+<h3>A. Predicción del Tiempo Muerto y Duración de Reparación (Regresión)</h3>
+<ul>
+  <li><strong>Objetivo:</strong> Estimar la duración esperada de un paro en horas para priorizar la asignación de técnicos y planear la operación.</li>
+  <li><strong>Variable dependiente:</strong> Tiempo muerto en horas (Downtime_h) o tiempo de reparación (Repair Time).</li>
+  <li><strong>Variables independientes:</strong> Tipo de equipo (IMM, Robot, Termorregulador), máquina específica, motivo del paro (Reason), código mayor de falla (Major Code), hora del día, día de la semana y turno.</li>
+  <li><strong>Métodos planeados:</strong> Regresión lineal múltiple (para entender el impacto de cada factor) y modelos basados en árboles de decisión (Random Forest o Gradient Boosting) para capturar relaciones no lineales y variabilidad de los paros más largos.</li>
+</ul>
+
+<h3>B. Clasificación Automática de Fallas No Registradas (Clasificación)</h3>
+<ul>
+  <li><strong>Objetivo:</strong> Asignar automáticamente una causa o código mayor a los paros que actualmente están etiquetados como "Sin clasificar", o predecir si un paro será crítico/grave (superior a 2 horas).</li>
+  <li><strong>Variable dependiente:</strong> Clase de falla / Código de falla (falla mecánica, eléctrica, hidráulica, inyección) o indicador binario de paro severo (1 si el paro excede el umbral crítico, 0 en caso contrario).</li>
+  <li><strong>Variables independientes:</strong> Descripción de la falla en texto (longitud y palabras clave), tipo de equipo, máquina, motivo reportado y hora del reporte.</li>
+  <li><strong>Métodos planeados:</strong> Árboles de clasificación, Regresión Logística y algoritmos de procesamiento de texto sencillo (clasificador Naive Bayes o ensamble de árboles con variables textuales extraídas).</li>
+</ul>
+
+<h3>C. Segmentación de Equipos y Fallas Críticas (Clustering)</h3>
+<ul>
+  <li><strong>Objetivo:</strong> Agrupar las máquinas según su patrón de comportamiento operativo para definir estrategias de mantenimiento diferenciadas (equipos con paros frecuentes pero cortos vs. equipos con pocas fallas pero paros muy prolongados).</li>
+  <li><strong>Variables utilizadas (no supervisado):</strong> Frecuencia total de fallas, tiempo medio entre fallas (MTBF), tiempo promedio de reparación (MTTR) y porcentaje de paros ocurridos durante cambios de modelo.</li>
+  <li><strong>Métodos planeados:</strong> Algoritmo de agrupamiento k-means y análisis jerárquico para categorizar las máquinas en cuadrantes de riesgo (ej. máquinas críticas prioritarias como Las Vegas, Charros o Consentida).</li>
+</ul>
+
+<h2>3. Preguntas para el Socio Formador</h2>
+<p>
+Para enriquecer la interpretación de los datos y asegurar que los modelos atiendan las necesidades reales de la planta, se plantean las siguientes preguntas:
+</p>
+<ul>
+  <li><strong>Registro y causas:</strong> ¿A qué se debe que casi un 30% del tiempo muerto aparezca registrado como "Sin clasificar"? ¿Existe alguna guía interna que determine cuándo un paro debe tipificarse detalladamente?</li>
+  <li><strong>Cambios de modelo:</strong> El análisis muestra que las fallas en cambios de modelo tienen tiempos de paro sustancialmente mayores. ¿El tiempo muerto registrado incluye el proceso normal de cambio de molde o corresponde exclusivamente al retraso no planeado por incidentes técnicos?</li>
+  <li><strong>Disponibilidad real de máquinas:</strong> Para calcular con precisión la confiabilidad (MTBF), ¿todas las máquinas operan las 24 horas los 7 días de la semana, o existen paros programados por falta de demanda y diferencias de turnos por celda de producción?</li>
+  <li><strong>Procedimiento de captura de tickets:</strong> Observamos que aproximadamente el 23% de los tickets tienen tiempo de reparación registrado en cero y otros tienen valores redondeados. ¿Cómo es el flujo diario en que el técnico cierra la orden y registra estas horas?</li>
+  <li><strong>Criterio de severidad para planta:</strong> Desde la perspectiva de producción y costos, ¿cuál es el umbral de tiempo a partir del cual un paro se considera crítico para la operación (por ejemplo, paros mayores a 1 o 2 horas)?</li>
+</ul>
+
+</body>
+</html>

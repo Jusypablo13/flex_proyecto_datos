@@ -1,0 +1,453 @@
+001: === PAGE 1 ===
+002: Predicción de Tiempos Muertos y Clasificación
+003: Automatizada de Tickets de Mantenimiento
+004: Mediante Aprendizaje Computacional en la
+005: Industria de Manufactura
+006: Juan Pablo Torres Guillen
+007: Matrícula: A01743268
+008: Tecnológico de Monterrey
+009: Guadalajara, Jalisco, México
+010: Angel David Lugo Lafarga
+011: Matrícula: A01741564
+012: Tecnológico de Monterrey
+013: Guadalajara, Jalisco, México
+014: Jose Pablo Lopez Rodriguez
+015: Matrícula: A01638911
+016: Tecnológico de Monterrey
+017: Guadalajara, Jalisco, México
+018: Resumen—En una planta de manufactura, que las máquinas
+019: estén disponibles es clave para cumplir con la producción. En
+020: el área de moldeo por inyección de Flex Guadalajara Norte, el
+021: mantenimiento correctivo enfrenta dos problemas: los paros de
+022: máquina (downtime) tienen duraciones muy variables y no se
+023: sabe con anticipación qué equipos van a requerir atención, y el
+024: registro de fallas no está estandarizado, por lo que casi un tercio
+025: del tiempo muerto no tiene una causa registrada. Este documento
+026: presenta la introducción, la descripción de los problemas a
+027: resolver (identificación de equipos críticos con predicción de
+028: fallas, y clasificación automática del texto de cierre de los tickets),
+029: la descripción del conjunto de datos y los principales resultados
+030: del análisis exploratorio de datos (EDA). El EDA muestra que el
+031: 72 % del tiempo muerto se concentra en máquinas de inyección
+032: (IMM) y robots, que el 29 % de las horas de paro ocurre durante
+033: cambios de molde (mediana de 0.66 h) y que es posible unir
+034: 4,928 tickets entre ambas fuentes para construir modelos de
+035: clasificación de texto, regresión y agrupamiento.
+036: Index Terms—Downtime prediction, text classification, explo-
+037: ratory data analysis, predictive maintenance, injection molding,
+038: natural language processing.
+039: I. INTRODUCCIÓN
+040: En la manufactura electrónica y de moldeo por inyección se
+041: trabaja con esquemas de producción Just-in-Time (JIT), donde
+042: cualquier paro no planeado de una máquina genera pérdidas
+043: económicas, retrasos con los clientes y baja la eficiencia global
+044: del equipo (Overall Equipment Effectiveness, OEE). Por eso,
+045: el mantenimiento industrial ha pasado de ser solo reactivo a
+046: usar análisis de datos y aprendizaje automático para anticipar
+047: fallas [1], [2].
+048: En la planta de Flex Guadalajara Norte, en la nave de
+049: Moldeo, operan alrededor de 80 máquinas de inyección de
+050: plástico (Injection Molding Machines, IMM) junto con robots
+051: cartesianos, termorreguladores, secadores y otros equipos pe-
+052: riféricos; en los registros aparecen 92 equipos en total. De
+053: acuerdo con el socio formador, actualmente solo unas 35
+054: máquinas están en operación, mientras que el resto tiene paro
+055: programado por baja demanda. La planta registra los paros de
+056: Proyecto de Optimización Operativa en Planta de Moldeo por Inyección
+057: (Flex Guadalajara Norte)
+058: máquina y las solicitudes de mantenimiento correctivo en dos
+059: sistemas distintos. Como parte de la captura es manual y los
+060: dos sistemas no siempre coinciden, hay inconsistencias en los
+061: datos y se pierde trazabilidad de algunas fallas.
+062: El objetivo del proyecto es aprovechar el historial de paros
+063: y tickets de la planta, incluyendo el texto libre que escriben
+064: operadores y técnicos, para generar información útil para el
+065: equipo de mantenimiento.
+066: I-A. Descripción de los Problemas a Resolver
+067: A partir de los datos entregados y de la sesión de preguntas
+068: con el socio formador, se definieron dos problemas principales:
+069: I-A1. Identificación de Equipos Críticos y Predicción de
+070: Fallas: El socio formador indicó que su prioridad es identifi-
+071: car los equipos que requieren atención y, además de prevenir,
+072: predecir las fallas. Actualmente la duración de los paros varía
+073: mucho (desde microparos de pocos minutos hasta paros de
+074: más de 60 horas), y no hay una forma sistemática de anticipar
+075: qué máquinas van a acumular más tiempo muerto. Para Flex,
+076: un problema es importante cuando representa alrededor del
+077: 20 % de su tiempo muerto semanal, y la gravedad de un paro
+078: no se define con un umbral fijo de horas: depende del tipo
+079: de máquina y de falla (por ejemplo, un paro de 6–7 horas se
+080: considera grave).
+081: Para atender este problema se plantea: (a) agrupar las
+082: máquinas según su comportamiento de fallas (frecuencia,
+083: tiempo promedio de reparación y tiempo entre fallas) para
+084: identificar las que requieren atención, y (b) predecir el número
+085: de paros y las horas de paro por máquina, así como la duración
+086: esperada de un paro. Como la duración tiene un fuerte sesgo
+087: a la derecha, se usarán transformaciones de escala y modelos
+088: robustos, con variables como el tipo de equipo, la máquina, el
+089: motivo del paro y el turno.
+090: I-A2. Clasificación del Texto de Cierre (Columna Q) en la
+091: Categoría Dispositivo (Columna AB): En la base de tickets,
+092: el técnico describe en texto libre lo que hizo al cerrar el ticket
+093: (columna Q, Work Description (Close Details))
+094: 
+095: === PAGE 2 ===
+096: y asigna manualmente una categoría del componente involu-
+097: crado (columna AB, Dispositivo). Esta categoría tiene
+098: 44 % de valores vacíos y 557 variantes escritas de forma
+099: distinta (por ejemplo, Installation e installation). Según el
+100: socio formador, las categorías vacías o en “0” corresponden a
+101: tickets que el técnico no cerró, y el catálogo de categorías es
+102: cerrado, por lo que no se pueden agregar categorías nuevas.
+103: El problema consiste en construir un algoritmo que reciba el
+104: texto de la columna Q y regrese la categoría de la columna
+105: AB, usando los 5,222 tickets que tienen ambos datos. Esto
+106: permitiría completar los tickets sin categoría y sugerir la
+107: categoría al técnico al cerrar un ticket.
+108: II. DATASET
+109: Se utilizaron dos archivos de Microsoft Excel entregados
+110: por el socio formador, con registros de enero de 2025 a agosto
+111: de 2026.
+112: II-A. Fuentes de Datos
+113: 1. Base de Tickets de Mantenimiento
+114: (Clasificacion de Tickets 2021.xlsm):
+115: Contiene las órdenes de mantenimiento correctivo. Su
+116: hoja principal, Data, tiene 11,150 filas (11,112 tickets
+117: únicos) y 42 columnas. Las variables principales son
+118: el número de ticket (Number, p. ej., REQ-1761298),
+119: la máquina (Equipment Name), las fechas de
+120: apertura y cierre (Opened, Updated), el tiempo de
+121: reparación capturado por el técnico (Repair Time),
+122: el código de falla mayor (Major Code), el código
+123: menor (Minor code) y dos campos de texto libre: la
+124: solicitud (Description) y el cierre técnico (Work
+125: Description (Close Details)).
+126: 2. Base de Tiempo Muerto (Resumen Downtime
+127: Current.xlsx): Registra los paros de máquina en
+128: la hoja 2024, con 10,166 eventos válidos y un total de
+129: 10,264 horas de paro. Incluye la máquina (Equipo),
+130: el tipo de equipo (Tipo_equipo), la clase de falla
+131: (Clase_falla), el motivo del paro (Reason), la
+132: marca (Brand) y la duración del paro (Downtime). El
+133: socio formador confirmó que Downtime es el tiempo
+134: real desde que la máquina se detiene hasta que vuelve a
+135: arrancar, expresado en horas decimales (1.5 = una hora
+136: y media).
+137: II-B. Unión de las Fuentes
+138: Ambas fuentes se unieron mediante el número de ticket
+139: (REQ). Se encontraron 4,928 tickets presentes en los dos
+140: archivos. Un mismo ticket puede tener varios paros asociados
+141: (en un caso, 102 microparos de la misma máquina en cinco
+142: días), por lo que al unir se suman las horas por ticket. El 12 %
+143: de las horas de paro (1,778 eventos) no tiene ticket asociado;
+144: según el socio formador, esto ocurre porque sus dos sistemas
+145: no están sincronizados. La Tabla I resume el tamaño de cada
+146: fuente.
+147: Tabla I
+148: RESUMEN DE LAS FUENTES DE DATOS
+149: Parámetro Descripción Cantidad
+150: Total de filas (Data) Tickets de mante-
+151: 11,150
+152: nimiento
+153: Tickets con texto de cierre
+154: Texto libre del
+155: 8,599
+156: (Q)
+157: (AB)
+158: Tickets con Q y AB técnico
+159: Tickets con Dispositivo
+160: Categoría del
+161: 6,220
+162: componente
+163: Datos para clasifi-
+164: 5,222
+165: car
+166: Eventos de paro (2024) Paros registrados 10,166
+167: Horas totales de paro Suma de Downti-
+168: 10,264 h
+169: me
+170: Tickets en ambas fuentes Unión por REQ 4,928
+171: Equipos en los registros Máquinas y peri-
+172: 92
+173: féricos
+174: II-C. Calidad de Datos y Preprocesamiento
+175: Se encontraron los siguientes problemas de calidad, que se
+176: corrigieron antes del análisis:
+177: Columnas vacías o con otro contenido: Assigned to,
+178: Tickets found, Total repair time y Time
+179: of response están 100 % vacías. La columna time
+180: 24 contiene estados del ticket y Eq2 contiene monedas
+181: (“US Dollars”, “Mexican Peso”). Las columnas SS y DD
+182: solo se usan en Flex para detectar registros duplicados,
+183: y Sub system 27 no es confiable según el socio
+184: formador; estas columnas se excluyeron.
+185: Duplicados: 38 tickets aparecen repetidos. En la base de
+186: paros, algunos registros se capturaron dos veces por ser
+187: manuales, lo que genera paros de 0 o 0.01 h.
+188: Valores “0”: en las columnas de categoría, el valor “0”
+189: indica que el ticket no se cerró o que el campo no se
+190: registró, por lo que se trató como dato faltante y no como
+191: una categoría.
+192: Códigos repetidos con prefijo: algunos códigos mayores
+193: tienen el prefijo de la nave (p. ej., B7-Injection
+194: System y Injection System). Se unificaron.
+195: Tiempo de reparación: Repair Time se captura ma-
+196: nualmente, está redondeado a múltiplos de 15 minutos
+197: y vale 0 en el 23 % de los tickets. Por eso se usa
+198: Downtime como medida de duración del paro.
+199: Hoja histórica 2020-2021: sus columnas están des-
+200: plazadas respecto a los encabezados (p. ej., Location
+201: contiene el texto de cierre y EQ Type la máquina) y usa
+202: un catálogo de fallas distinto, por lo que se excluyó del
+203: análisis.
+204: Limpieza de texto: se pasó el texto a minúsculas, se qui-
+205: taron acentos y signos, se eliminaron palabras vacías en
+206: español y se reemplazaron números y claves REQ-xxxx
+207: por los tokens num y ticketref.
+208: Agrupación de clases raras: en Dispositivo, las 519
+209: variantes de los tickets con texto se redujeron a 353 al
+210: corregir errores de escritura y sinónimos (p. ej., door’s
+211: switch, buscan error), y después a 87 clases al agrupar
+212: en Otros las que tienen menos de 10 ejemplos (13.5 %
+213: 
+214: === PAGE 3 ===
+215: Tickets (escala log)
+216: 103
+217: 102
+218: 101
+219: 100
+220: umbral de 10 ejemplos
+221: 0 50 Categorías de 100 150 Dispositivo 200 250 (ordenadas por 300 350
+222: frecuencia)
+223: Figura 1. Número de mayúsculas y espacios de 10 ejemplos usado tickets por categoría (escala logarítmica). de La para agrupar en Otros.
+224: Dispositivo línea punteada tras marca unificar
+225: el umbral
+226: (a) Horas
+227: (b) Escala logarítmica
+228: Paros
+229: 3000
+230: 2000
+231: 1000
+232: 0
+233: 750
+234: 500
+235: 250
+236: 0
+237: 0 2 Horas (recortado 4 6
+238: a 6 h)
+239: −4 −2 log10(horas)
+240: 0 2
+241: Figura 2. Distribución escala logarítmica.
+242: de la duración de los paros: (a) en horas y (b) en
+243: de los datos). pocos ejemplos La (Fig. mayoría 1).
+244: de las categorías tiene muy
+245: III. El análisis tan los paros modelos.
+246: EXPLORATORY exploratorio en la planta DATA permitió y definir ANALYSIS (EDA)
+247: entender cómo se qué variables usar compor-
+248: en los
+249: III-A. Distribución del Downtime
+250: Los 10,166 paros tienen una distribución muy sesgada a la
+251: derecha (Fig. 2):
+252: Mediana: 0.394 horas (aproximadamente 24 minutos).
+253: Media: 1.010 horas (σ= 2.210 horas).
+254: Percentil 75 (Q3): 1.052 horas.
+255: Percentil 95: 3.882 horas; máximo: 67.825 horas.
+256: El 10 % de los paros más largos explica más del 50 % de las
+257: horas totales de paro. En escala logarítmica la distribución es
+258: casi simétrica, por lo que conviene aplicar una transformación
+259: logarítmica a la duración para la regresión lineal [3], y usar
+260: modelos de árboles (Random Forest [4], Gradient Boosting
+261: [5]) que son menos sensibles a valores extremos.
+262: III-B. Concentración por El tiempo muerto no se Tipo reparte tipos de equipo (Tabla II).
+263: Las máquinas de inyección juntos el 71.96 % del tiempo tienen pocos paros (456), pero es casi el doble que la de las menos, pero cada falla tarda de de Equipo
+264: forma uniforme entre los
+265: (IMM) y los robots explican
+266: muerto. Los termorreguladores
+267: su mediana por paro (0.781 h)
+268: IMM (0.411 h); es decir, fallan
+269: más en resolverse.
+270: Tabla II
+271: TIEMPO MUERTO POR TIPO DE EQUIPO
+272: Tipo de equipo Eventos Horas (h) Mediana (h) % Horas
+273: IMM (Inyección) 5,056 5,349.7 0.411 52.12 %
+274: Robot cartesiano 2,050 2,036.4 0.417 19.84 %
+275: Termorregulador 456 656.0 0.781 6.39 %
+276: Secador industrial 458 553.5 0.338 5.39 %
+277: Sin clasificar 1,116 551.5 0.198 5.37 %
+278: Blender / Dosificador 345 274.8 0.420 2.68 %
+279: Otros periféricos 685 842.1 0.450 8.21 %
+280: MTTR (h)
+281: 2.0
+282: 1.5
+283: 1.0
+284: 0.5
+285: Charros
+286: Las Vegas
+287: LaGloriosa Consentida
+288: LaBarranca
+289: 0 100 200 300 400 500
+290: Número de paros
+291: Figura 3. Número de paros contra tiempo medio de reparación (MTTR) por
+292: máquina. El tamaño del punto indica las horas totales de paro y las líneas
+293: punteadas marcan las medianas.
+294: III-C. Pareto de Máquinas e Indicadores de Confiabilidad
+295: De las 92 máquinas, 55 (60 %) acumulan el 80 % de las
+296: horas de paro, por lo que no se cumple un Pareto 80/20
+297: estricto. Aun así, algunas máquinas destacan (Fig. 3):
+298: Las Vegas (IMM): es la máquina con más tiempo
+299: muerto: 389 paros y 472.1 horas (4.6 % del total), con
+300: un tiempo medio de reparación (MTTR) de 1.21 h y un
+301: tiempo medio entre fallas (MTBF) de 35.7 h.
+302: Charros, LaGloriosa y Consentida: cada una acumula
+303: más de 300 horas de paro.
+304: LaBarranca: tiene un comportamiento distinto: 518 pa-
+305: ros, pero de solo 0.4 h en promedio (MTBF ≈ 27 h),
+306: principalmente por microparos eléctricos repetidos.
+307: El MTBF se calculó suponiendo que las máquinas operan 24
+308: horas los 7 días de la semana. Como el socio formador indicó
+309: que hay paros programados por baja demanda, estos valores
+310: son aproximados y se recalcularán con las horas reales de
+311: operación.
+312: III-D. Tipos de Falla y Oportunidad de Clasificación
+313: La categoría con más tiempo acumulado es “Sin clasificar”:
+314: 3,385 paros y 3,033.4 horas (29.55 % del tiempo muerto total
+315: en la base de paros). Entre las causas registradas destacan:
+316: 1. Electrical Failure: 1,282 paros, 1,305.3 h (12.72 % del
+317: total).
+318: 2. Servicios Varios: 516 paros, 631.9 h (6.16 % del total);
+319: es una categoría genérica que no indica la causa real.
+320: 3. Calibration Parameter Modification: 440 paros, 438.8 h
+321: (4.28 % del total).
+322: 
+323: === PAGE 4 ===
+324: Horas de paro Número de paros
+325: Horas
+326: 1000
+327: 800
+328: 600
+329: 400
+330: 200
+331: 0
+332: 800
+333: 600
+334: 400
+335: 200
+336: 0
+337: Paros
+338: 25-01
+339: 25-03
+340: 25-05
+341: 25-07
+342: 25-09
+343: 25-11
+344: 26-01
+345: 26-03
+346: 26-05
+347: 26-07
+348: Figura 4. Horas de paro (barras) y número de paros (línea) por mes, de enero
+349: de 2025 a julio de 2026. Se excluye agosto de 2026 por estar incompleto.
+350: 4. Barrel Heater Failure: 320 paros, 385.7 h (3.76 % del
+351: total, mediana de 0.627 h).
+352: 5. Broken Component: 273 paros, 380.7 h (3.71 % del total,
+353: mediana de 0.668 h).
+354: Esto justifica entrenar un clasificador de texto (procesamiento
+355: de lenguaje natural, NLP) sobre el texto de cierre del técnico
+356: para asignar la causa de forma automática. Sin embargo, solo
+357: cerca de la mitad de los paros sin clasificar tiene un ticket con
+358: texto; el resto son paros sin ticket, por lo que el clasificador
+359: no puede cubrir todo el tiempo muerto sin clasificar.
+360: III-E. Impacto de los Cambios de Modelo
+361: El 29 % de las horas de paro ocurre con el motivo
+362: “CAMBIO DE MODELO – FALLA MANTENIMIENTO”.
+363: La mediana de estos paros es de 0.66 horas, casi el doble que la
+364: del mantenimiento correctivo normal (0.34 horas). Esto indica
+365: que los cambios de molde (ajuste de moldes, conexión de
+366: colada caliente y calibración de parámetros) son el momento
+367: con más riesgo de fallas.
+368: III-F. Comportamiento en el Tiempo y Correlaciones
+369: Las horas de paro mensuales bajaron de 600–870 h/mes a
+370: inicios de 2025 a 300–500 h/mes a mediados de 2026, aunque
+371: el número de paros se mantuvo estable (Fig. 4). Comparando
+372: los mismos meses (enero a agosto), la mediana por paro bajó
+373: de 0.55 h en 2025 a 0.31 h en 2026. Esta baja puede deberse a
+374: mejoras en la atención, pero también a que actualmente operan
+375: menos máquinas por baja demanda, por lo que se debe tomar
+376: en cuenta al separar los datos de entrenamiento y prueba. Por
+377: hora del día, los paros se concentran en la tarde y la noche
+378: (16:00 a 22:00 horas), que coincide con el segundo turno.
+379: Sobre las correlaciones entre variables numéricas:
+380: La correlación de Spearman entre el tiempo de repara-
+381: ción capturado (Repair Time) y la duración del paro
+382: (Downtime) es baja (rs = 0.32), lo que confirma que
+383: miden cosas distintas: horas de trabajo del técnico y
+384: tiempo que la máquina estuvo parada.
+385: El número de palabras del texto de cierre tiene una corre-
+386: lación moderada con el tiempo de reparación (rs = 0.59):
+387: las reparaciones más largas se describen con más detalle.
+388: Las demás variables numéricas casi no se relacionan con
+389: la duración del paro. Por eso, los modelos dependerán
+390: principalmente de variables categóricas (tipo de equipo,
+391: máquina, tipo de falla, turno) y del texto.
+392: IV. CONCLUSIONES PRELIMINARES Y TRABAJO FUTURO
+393: La introducción, la definición de los problemas, la descrip-
+394: ción del dataset y el análisis exploratorio muestran que los
+395: datos sí permiten construir los modelos propuestos. La unión
+396: de 4,928 tickets entre ambas fuentes, los 5,222 tickets con
+397: texto y categoría, y la limpieza de los registros sin clasificar
+398: son la base para las siguientes etapas:
+399: 1. Agrupamiento de máquinas (k-means [6] y clustering
+400: jerárquico [7]) con indicadores de confiabilidad (MTBF,
+401: MTTR, frecuencia de paros y % de paros en cambios
+402: de modelo), para identificar los equipos que requieren
+403: atención, que es la prioridad del socio formador. El
+404: MTBF se recalculará con las horas reales de operación
+405: de cada máquina.
+406: 2. Modelos de regresión y ensamble (Random Forest [4],
+407: LightGBM [8] y XGBoost [9]) para predecir el número
+408: de paros y las horas de paro por máquina, así como la
+409: duración esperada de un paro al momento del reporte.
+410: 3. Clasificación del texto de cierre (columna Q) en la
+411: categoría Dispositivo (columna AB) con TF-IDF
+412: [10] de palabras y de caracteres, regresión logística
+413: [11] y Naive Bayes [12], implementados con scikit-learn
+414: [13], y exploración de modelos de lenguaje [14].
+415: REFERENCIAS
+416: [1] R. K. Mobley, An Introduction to Predictive Maintenance, 2nd ed.
+417: Butterworth-Heinemann, 2002.
+418: [2] A. K. S. Jardine, D. Lin, and D. Banjevic, “A review on machinery
+419: diagnostics and prognostics implementing condition-based maintenan-
+420: ce,” Mechanical Systems and Signal Processing, vol. 20, no. 7, pp.
+421: 1483–1510, 2006.
+422: [3] T. Hastie, R. Tibshirani, and J. Friedman, The Elements of Statistical
+423: Learning: Data Mining, Inference, and Prediction, 2nd ed. Springer,
+424: 2009.
+425: [4] L. Breiman, “Random forests,” Machine Learning, vol. 45, no. 1, pp.
+426: 5–32, 2001.
+427: [5] J. H. Friedman, “Greedy function approximation: A gradient boosting
+428: machine,” The Annals of Statistics, vol. 29, no. 5, pp. 1189–1232, 2001.
+429: [6] J. MacQueen, “Some methods for classification and analysis of multiva-
+430: riate observations,” in Proc. 5th Berkeley Symp. Mathematical Statistics
+431: and Probability, vol. 1, 1967, pp. 281–297.
+432: [7] J. H. Ward, “Hierarchical grouping to optimize an objective function,”
+433: Journal of the American Statistical Association, vol. 58, no. 301, pp.
+434: 236–244, 1963.
+435: [8] G. Ke et al., “LightGBM: A highly efficient gradient boosting decision
+436: tree,” in Advances in Neural Information Processing Systems, vol. 30,
+437: 2017, pp. 3146–3154.
+438: [9] T. Chen and C. Guestrin, “XGBoost: A scalable tree boosting system,”
+439: in Proc. 22nd ACM SIGKDD Int. Conf. Knowledge Discovery and Data
+440: Mining, 2016, pp. 785–794.
+441: [10] G. Salton and C. Buckley, “Term-weighting approaches in automatic
+442: text retrieval,” Information Processing & Management, vol. 24, no. 5,
+443: pp. 513–523, 1988.
+444: [11] D. R. Cox, “The regression analysis of binary sequences,” Journal of the
+445: Royal Statistical Society: Series B, vol. 20, no. 2, pp. 215–242, 1958.
+446: [12] A. McCallum and K. Nigam, “A comparison of event models for naive
+447: Bayes text classification,” in AAAI-98 Workshop on Learning for Text
+448: Categorization, 1998, pp. 41–48.
+449: [13] F. Pedregosa et al., “Scikit-learn: Machine learning in Python,” Journal
+450: of Machine Learning Research, vol. 12, pp. 2825–2830, 2011.
+451: [14] I. Goodfellow, Y. Bengio, and A. Courville, Deep Learning. MIT Press,
+452: 2016.
+453: 

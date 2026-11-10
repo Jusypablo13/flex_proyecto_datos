@@ -1,0 +1,3 @@
+Modelo,PR-AUC,ROC-AUC,Recall (Prec≥0.80),Umbral Óptimo,Macro F1 (Multiclase),Tiempo Entr. (s)
+Regresión Logística (Lineal),0.8540,0.9977,0.8179,0.9673,0.8028,0.60
+Gradient Boosting (HistGBDT),0.9996,1.0000,1.0000,0.0006,0.9960,7.56
