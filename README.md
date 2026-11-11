@@ -104,3 +104,4 @@ Evaluado en el conjunto de validación con desbalance extremo ($1.84\%$ positivo
 2. **Fuga por registros de mantenimiento:** Se demostró que el $97.6\%$ de los registros de `PdM_maint` coinciden exactamente con fallas (reemplazos correctivos). Se prohibió su uso como indicador en $t$; en su lugar se calculó el tiempo acumulado desde el último reemplazo previo ($t_{\text{maint}} \le t$).
 3. **Fuga en normalización:** El escalador `StandardScaler` fue ajustado (*fit*) exclusivamente con datos de entrenamiento.
 4. **Fuga en particiones:** Margen de $H=24$h en las fronteras de corte temporal.
+
